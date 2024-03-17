@@ -22,6 +22,23 @@ const register = {
     }
 }
 
+const login = {
+    type: GraphQLString,
+    description: 'Login and return a JWT token',
+    args: {
+        email: { type: GraphQLString },
+        password: { type: GraphQLString }
+    },
+    resolve: async (_, args) => {
+        const user = await User.findOne({ email: args.email }).select('+password')
+        if (!user || args.password !== user.password) throw new Error('Invalid credentials');
+
+        const token = createJwtToken({ _id: user._id, username: user.username, email: user.email, displayName: user.displayName })
+
+        return token;
+    }
+}
+
 module.exports = {
-    register
+    register, login
 }
